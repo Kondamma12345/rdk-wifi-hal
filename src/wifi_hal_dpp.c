@@ -56,6 +56,7 @@
 #include <wifi_hal_rdk_framework.h>
 #include <collection.h>
 #include <cJSON.h>
+#include <limits.h>
 
 #define printf wifi_dpp_dbg_print
 
@@ -2825,6 +2826,11 @@ INT wifi_dppSendConfigResponse(wifi_device_dpp_context_t *ctx)
     tlv_len += 5;
 
     wrapped_len = set_config_frame_wrapped_data(config_response_frame->rsp_body, tlv_len, instance, ctx);
+    if (wrapped_len == UINT_MAX) { //CID 45 & 47
+        ctx->activation_status = ActStatus_Failed;
+        printf("%s:%d Invalid wrapped_len\n", __func__, __LINE__);
+        return RETURN_ERR;
+    }
     tlv_len += (wrapped_len + 4);
 
     config_response_frame->rsp_len = tlv_len;
