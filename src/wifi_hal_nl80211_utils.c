@@ -40,6 +40,7 @@
 #include "wifi_hal.h"
 #include "wifi_hal_priv.h"
 #include <cjson/cJSON.h>
+#include <limits.h>
 
 #ifdef CONFIG_WIFI_EMULATOR
 #define MAX_CLIENTS 3
@@ -4961,6 +4962,10 @@ static inline int init_json_interface_map(void)
 
     fseek(fp, 0, SEEK_END);
     len = ftell(fp);
+    if (len == UINT_MAX) { //CID 57
+        fclose(fp);
+        return -1;
+    }
     fseek(fp, 0, SEEK_SET);
 
     ret = -1;

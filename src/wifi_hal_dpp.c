@@ -1624,6 +1624,10 @@ void delete_dpp_session_instance(wifi_device_dpp_context_t *ctx)
 
 int delete_dpp_reconfig_context(unsigned int ap_index, wifi_dpp_reconfig_instance_t *instance)
 {
+	if (instance == NULL) { //CID 82
+		printf("%s:%d:Invalid Argument\n", __func__, __LINE__);
+		return RETURN_ERR;
+	}
 	if (instance->bnctx != NULL) {
 		BN_CTX_free(instance->bnctx);
 	}
@@ -1648,9 +1652,7 @@ int delete_dpp_reconfig_context(unsigned int ap_index, wifi_dpp_reconfig_instanc
 		EC_POINT_free(instance->pt);
 	}
 	
-	if (instance != NULL) {
-		free(instance);
-	}
+	free(instance);
 
 	return RETURN_OK;
 }
@@ -1757,6 +1759,10 @@ int wifi_dppCreateReconfigContext(unsigned int ap_index, char *net_access_key, w
 
 int delete_dpp_csign_instance(unsigned int ap_index, wifi_dpp_csign_instance_t *instance)
 {
+	if (instance == NULL) { //CID 83
+		printf("%s:%d:Invalid Argument\n", __func__, __LINE__);//CID 83
+		return RETURN_ERR;
+	}
 	if (instance->bnctx != NULL) {
 		BN_CTX_free(instance->bnctx);
 	}
@@ -1785,9 +1791,7 @@ int delete_dpp_csign_instance(unsigned int ap_index, wifi_dpp_csign_instance_t *
 		free(instance->bn);
 	}
 	
-	if (instance != NULL) {
-		free(instance);
-	}
+	free(instance);
 	
 	return RETURN_OK;
 

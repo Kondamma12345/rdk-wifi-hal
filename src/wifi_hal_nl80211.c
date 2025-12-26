@@ -17392,6 +17392,10 @@ static size_t add_eid_rnr_len(void *priv, size_t *current_len)
 
     for (i = 0; i < g_wifi_hal.num_radios; i++) {
         radio = get_radio_by_rdk_index(i);
+        if (radio == NULL) { //CID 43
+            wifi_hal_error_print("%s:%d failed to get radio for index: %d\n", __func__, __LINE__, i);
+            return 0;
+        }
         if (radio && radio->oper_param.band == WIFI_FREQUENCY_6_BAND) {
             break;
         }
@@ -17633,6 +17637,10 @@ static u8 *add_eid_rnr(void *priv, u8 *eid, size_t *current_len)
 
     for (i = 0; i < g_wifi_hal.num_radios; i++) {
         radio = get_radio_by_rdk_index(i);
+        if (radio == NULL) { //CID 44
+            wifi_hal_error_print("%s:%d failed to get radio for index: %d\n", __func__, __LINE__, i);
+            return 0;
+        }
         if (radio && radio->oper_param.band == WIFI_FREQUENCY_6_BAND) {
             break;
         }
