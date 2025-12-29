@@ -2339,11 +2339,12 @@ INT wifi_hal_startScan(wifi_radio_index_t index, wifi_neighborScanMode_t scan_mo
     wifi_interface_info_t *interface;
     wifi_vap_info_t *vap;
     bool found = false;
-    wifi_radio_operationParam_t *radio_param, param;
+    wifi_radio_operationParam_t *radio_param;
     char country[8] = {0}, tmp_str[32] = {0}, chan_list_str[512] = {0};
     unsigned int freq_list[MAX_FREQ_LIST_SIZE], i;
     ssid_t  ssid_list[8];
     int op_class, freq_num = 0;
+    u8 prev_channel;
 
     wifi_hal_stats_dbg_print("%s:%d: index: %d mode: %d dwell time: %d\n", __func__, __LINE__, index,
         scan_mode, dwell_time);
@@ -2404,18 +2405,19 @@ INT wifi_hal_startScan(wifi_radio_index_t index, wifi_neighborScanMode_t scan_mo
     }
 
     get_coutry_str_from_code(radio_param->countryCode, country);
-    memcpy((unsigned char *)&param, (unsigned char *)radio_param, sizeof(wifi_radio_operationParam_t));
+    // assigning in to another variable not to affect the global parametrs
+    prev_channel = radio_param->channel;
 
     for (i = 0; i < num && freq_num < MAX_FREQ_LIST_SIZE; i++) {
-        param.channel = (scan_mode == WIFI_RADIO_SCAN_MODE_ONCHAN) ?
-            radio_param->channel : chan_list[i]; 
-
-        if ((op_class = get_op_class_from_radio_params(&param)) == -1) {
-            wifi_hal_stats_error_print("%s:%d: Invalid channel %d\n", __func__, __LINE__, param.channel);
+        radio_param->channel = (scan_mode == WIFI_RADIO_SCAN_MODE_ONCHAN) ?
+            prev_channel : chan_list[i]; 
+  
+        if ((op_class = get_op_class_from_radio_params(radio_param)) == -1) {
+            wifi_hal_stats_error_print("%s:%d: Invalid channel %d\n", __func__, __LINE__, radio_param->channel);
             continue;
         }
 
-        freq_list[freq_num] = ieee80211_chan_to_freq(country, op_class, param.channel);
+        freq_list[freq_num] = ieee80211_chan_to_freq(country, op_class, radio_param->channel);
         if (freq_list[freq_num] == 0) {
             continue;
         }
@@ -2424,7 +2426,7 @@ INT wifi_hal_startScan(wifi_radio_index_t index, wifi_neighborScanMode_t scan_mo
 
 	freq_num++;
     }
-
+    radio_param->channel = prev_channel;
     if (freq_num == 0) {
         wifi_hal_stats_error_print("%s:%d: No valid channels\n", __func__, __LINE__);
         return RETURN_ERR;
