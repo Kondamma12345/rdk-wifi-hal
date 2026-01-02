@@ -1854,7 +1854,7 @@ INT wifi_hal_set_acs_keep_out_chans(wifi_radio_operationParam_t *wifi_radio_oper
         for (int j = 0; j < chans_per_band->num_channels_list; j++) {
             wifi_channels_list_t chanlist = chans_per_band->channels_list[j];
             if (wifi_drv_get_chspc_configs(radioIndex, bandwidth, 
-                                         chanlist, buff) != 0) {
+                                         &chanlist, buff) != 0) {
                 wifi_hal_error_print("%s:%d Failed for radio %u bandwidth 0x%x\n",
                                    __func__, __LINE__, radioIndex, bandwidth);
                 return RETURN_ERR;
