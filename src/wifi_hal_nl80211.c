@@ -7305,6 +7305,7 @@ int nl80211_delete_interfaces(wifi_radio_info_t *radio)
 
 int nl80211_init_primary_interfaces()
 {
+    wifi_hal_info_print("%s:%d: Entry\n", __func__, __LINE__);
     unsigned int i, ret;
     struct nl_msg *msg;
     wifi_radio_info_t *radio;
@@ -7368,6 +7369,7 @@ int nl80211_init_primary_interfaces()
         }
         nl80211_interface_enable(wifi_hal_get_interface_name(primary_interface), true);
     }
+    wifi_hal_info_print("%s:%d: Exit\n", __func__, __LINE__);
 
     return 0;
 }
