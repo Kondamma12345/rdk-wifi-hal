@@ -2087,7 +2087,7 @@ wifi_interface_info_t *wifi_hal_get_vap_interface_by_type(wifi_radio_info_t *rad
 }
 
 #if !defined(PLATFORM_LINUX)
-int getIpStringFromAdrress (char * ipString, ip_addr_t * ip)
+int getIpStringFromAdrress (char * ipString, ip_addr_t * ip, size_t len)
 {
     if (ip->family == wifi_ip_family_ipv4) {
         inet_ntop(AF_INET, &ip->u.IPv4addr, ipString, INET_ADDRSTRLEN);
@@ -2096,7 +2096,7 @@ int getIpStringFromAdrress (char * ipString, ip_addr_t * ip)
         inet_ntop(AF_INET6, &ip->u.IPv6addr, ipString, INET_ADDRSTRLEN);
     }
     else {
-        strcpy(ipString,"0.0.0.0");
+        snprintf(ipString, len, "%s", "0.0.0.0");
         wifi_hal_error_print("%s IP not recognised\n", __func__);
         return 0;
     }
@@ -2366,23 +2366,23 @@ int get_radio_variant_str_from_int(unsigned int variant, char *variant_str)
     return RETURN_OK;
 }
 
-int get_vap_mode_str_from_int_mode(unsigned char vap_mode, char *vap_mode_str)
+int get_vap_mode_str_from_int_mode(unsigned char vap_mode, char *vap_mode_str, size_t len)
 {
     switch (vap_mode) {
     case wifi_vap_mode_ap:
-        strcpy(vap_mode_str, "ap");
+        snprintf(vap_mode_str, len, "%s", "ap");
         break;
 
     case wifi_vap_mode_sta:
-        strcpy(vap_mode_str, "sta");
+        snprintf(vap_mode_str, len, "%s", "sta");
         break;
 
     case wifi_vap_mode_monitor:
-        strcpy(vap_mode_str, "monitor");
+        snprintf(vap_mode_str, len, "%s", "monitor");
         break;
 
     default:
-        strcpy(vap_mode_str, "none");
+        snprintf(vap_mode_str, len, "%s", "none");
         break;
     }
 
@@ -2439,29 +2439,29 @@ int get_security_mode_int_from_str(char *security_mode_str,char *mfp_str,wifi_se
     return RETURN_OK;
 }
 
-int get_security_mode_str_from_int(wifi_security_modes_t security_mode, unsigned int vap_index, char *security_mode_str)
+int get_security_mode_str_from_int(wifi_security_modes_t security_mode, unsigned int vap_index, char *security_mode_str, size_t len)
 {
     (void)vap_index;
 
     switch (security_mode) {
     case wifi_security_mode_none:
-        strcpy(security_mode_str, "None");
+        snprintf(security_mode_str, len, "%s", "None");
         break;
 
     case wifi_security_mode_enhanced_open:
-        strcpy(security_mode_str, "owe");
+        snprintf(security_mode_str, len, "%s", "owe");
         break;
 
     case wifi_security_mode_wpa_personal:
-        strcpy(security_mode_str, "psk");
+        snprintf(security_mode_str, len, "%s", "psk");
         break;
 
     case wifi_security_mode_wpa2_personal:
-        strcpy(security_mode_str, "psk2");
+        snprintf(security_mode_str, len, "%s", "psk2");
         break;
 
     case wifi_security_mode_wpa_wpa2_personal:
-        strcpy(security_mode_str, "psk psk2");
+        snprintf(security_mode_str, len, "%s", "psk psk2");
         break;
 
     case wifi_security_mode_wpa3_personal:
@@ -2474,13 +2474,13 @@ int get_security_mode_str_from_int(wifi_security_modes_t security_mode, unsigned
             }
             if (wifi_vap_mode_ap == interface->vap_info.vap_mode &&
                 !interface->u.ap.conf.disable_11be) {
-                strcpy(security_mode_str, "sae sae-ext");
+                snprintf(security_mode_str, len, "%s", "sae sae-ext");
             } else {
-                strcpy(security_mode_str, "sae");
+                snprintf(security_mode_str, len, "%s", "sae");
             }
         }
 #else
-        strcpy(security_mode_str, "sae");
+        snprintf(security_mode_str, len, "%s", "sae");
 #endif /* CONFIG_IEEE80211BE */
         break;
 
@@ -2494,34 +2494,34 @@ int get_security_mode_str_from_int(wifi_security_modes_t security_mode, unsigned
             }
             if (wifi_vap_mode_ap == interface->vap_info.vap_mode &&
                 !interface->u.ap.conf.disable_11be) {
-                strcpy(security_mode_str, "sae sae-ext psk2");
+                snprintf(security_mode_str, len, "%s", "sae sae-ext psk2");
             } else {
-                strcpy(security_mode_str, "psk2 sae");
+                snprintf(security_mode_str, len, "%s", "psk2 sae");
             }
         }
 #else
-        strcpy(security_mode_str, "psk2 sae");
+        snprintf(security_mode_str, len, "%s", "psk2 sae");
 #endif /* CONFIG_IEEE80211BE */
         break;
 
     case wifi_security_mode_wpa_enterprise:
-        strcpy(security_mode_str, "wpa");
+        snprintf(security_mode_str, len, "%s", "wpa");
         break;
 
     case wifi_security_mode_wpa2_enterprise:
-        strcpy(security_mode_str, "wpa2");
+        snprintf(security_mode_str, len, "%s", "wpa2");
         break;
 
     case wifi_security_mode_wpa3_enterprise:
-        strcpy(security_mode_str, "wpa2");
+        snprintf(security_mode_str, len, "%s", "wpa2");
         break;
 
     case wifi_security_mode_wpa_wpa2_enterprise:
-        strcpy(security_mode_str, "wpa wpa2");
+        snprintf(security_mode_str, len, "%s", "wpa wpa2");
         break;
 
     case wifi_security_mode_wpa3_compatibility:
-        strcpy(security_mode_str, "psk2 sae");
+        snprintf(security_mode_str, len, "%s", "psk2 sae");
         break;
 
     default:
@@ -2532,27 +2532,27 @@ int get_security_mode_str_from_int(wifi_security_modes_t security_mode, unsigned
     return RETURN_OK;
 }
 
-int get_security_encryption_mode_str_from_int(wifi_encryption_method_t encryption_mode, unsigned int vap_index, char *encryption_mode_str)
+int get_security_encryption_mode_str_from_int(wifi_encryption_method_t encryption_mode, unsigned int vap_index, char *encryption_mode_str, size_t len)
 {
     (void)vap_index;
 
     switch (encryption_mode) {
     case wifi_encryption_tkip:
-        strcpy(encryption_mode_str, "tkip");
+        snprintf(encryption_mode_str, len, "%s", "tkip");
         break;
 
     case wifi_encryption_aes:
-        strcpy(encryption_mode_str, "aes");
+        snprintf(encryption_mode_str, len, "%s", "aes");
         break;
 
 #ifdef CONFIG_IEEE80211BE
     case wifi_encryption_aes_gcmp256:
-        strcpy(encryption_mode_str, "aes+gcmp256");
+        snprintf(encryption_mode_str, len, "%s", "aes+gcmp256");
         break;
 #endif /* CONFIG_IEEE80211BE */
 
     case wifi_encryption_aes_tkip:
-        strcpy(encryption_mode_str, "tkip+aes");
+        snprintf(encryption_mode_str, len, "%s", "tkip+aes");
         break;
 
     default:
@@ -2573,8 +2573,8 @@ INT get_coutry_str_from_oper_params(wifi_radio_operationParam_t *operParams, cha
     memset(tmp_environment_str, 0, sizeof(tmp_environment_str));
    
     // Default country as "USI"
-    strcpy(tmp_countrycode_str, "US");
-    strcpy(tmp_environment_str, "I");
+    snprintf(tmp_countrycode_str, sizeof(tmp_countrycode_str), "%s", "US");
+    snprintf(tmp_environment_str, sizeof(tmp_environment_str), "%s", "I");
 
     for (index = 0; index < ARRAY_SZ(wifi_country_map); index++) {
         if (wifi_country_map[index].countryCode == operParams->countryCode) {
@@ -3049,7 +3049,7 @@ INT get_coutry_str_from_code(wifi_countrycode_type_t code, char *country)
 
     for (index = 0; index < ARRAY_SZ(wifi_country_map); index++) {
         if (wifi_country_map[index].countryCode == code) {
-            strcpy(country, wifi_country_map[index].countryStr);
+            snprintf(country, 4, "%s", wifi_country_map[index].countryStr);
             value_updated = true;
             break;
         }
@@ -3057,7 +3057,7 @@ INT get_coutry_str_from_code(wifi_countrycode_type_t code, char *country)
 
     if (value_updated == false) {
         //Copy default value
-        strcpy(country, "US");
+        snprintf(country, 4, "%s", "US");
     }
     return RETURN_OK;
 }
@@ -5656,7 +5656,7 @@ int configure_vap_name_basedon_colocated_mode(char *ifname, int colocated_mode)
         if (strncmp(interface_index_map[index].interface_name, ifname, strlen(ifname)) == 0) {
             switch (colocated_mode) {
             case 0:
-                strcpy((char *)interface_index_map[index].vap_name, "mesh_sta_");
+                snprintf((char *)interface_index_map[index].vap_name, sizeof(interface_index_map[index].vap_name), "%s", "mesh_sta_");
                 concat_band_to_vap_name((char *)interface_index_map[index].vap_name,
                     interface_index_map[index].rdk_radio_index);
                 break;
@@ -5669,7 +5669,7 @@ int configure_vap_name_basedon_colocated_mode(char *ifname, int colocated_mode)
                 }
                 /* If only one VAP in collocated mode, configure it as mesh_back_haul */
                 if (vap_count == 1) {
-                    strcpy((char *)interface_index_map[index].vap_name, "mesh_backhaul_");
+                    snprintf((char *)interface_index_map[index].vap_name, sizeof(interface_index_map[index].vap_name), "%s", "mesh_backhaul_");
                     concat_band_to_vap_name((char *)interface_index_map[index].vap_name,
                         interface_index_map[index].rdk_radio_index);
                 }

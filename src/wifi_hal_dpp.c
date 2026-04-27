@@ -664,7 +664,7 @@ int dpp_build_connector(wifi_device_dpp_context_t *dpp_ctx, char* connector, boo
     return conn_len;
 }
 
-void dpp_build_config(wifi_device_dpp_context_t *ctx, char* str)
+void dpp_build_config(wifi_device_dpp_context_t *ctx, char* str, size_t len)
 {
  	char *out;
 	char reconfig_connector[1024];
@@ -745,7 +745,7 @@ void dpp_build_config(wifi_device_dpp_context_t *ctx, char* str)
         {
             printf("%s\n",out);
             /*let input string have json */
-            strcpy(str, out);
+            snprintf(str, len, "%s", out);
             free(out);
         }
 	
@@ -927,25 +927,27 @@ hkdf (const EVP_MD *h, int skip,
          */
         ctr++;
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
-        HMAC_Init_ex(&ctx, prk, prklen, h, NULL);
-        HMAC_Update(&ctx, digest, digestlen);
+        if (!HMAC_Init_ex(&ctx, prk, prklen, h, NULL) || !HMAC_Update(&ctx, digest, digestlen))
+            break;
 #else
-        HMAC_Init_ex(ctx, prk, prklen, h, NULL);
-        HMAC_Update(ctx, digest, digestlen);
+        if (!HMAC_Init_ex(ctx, prk, prklen, h, NULL) || !HMAC_Update(ctx, digest, digestlen))
+            break;
 #endif
         if (info && (infolen != 0)) {
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
-            HMAC_Update(&ctx, info, infolen);
+            if (!HMAC_Update(&ctx, info, infolen))
+                break;
 #else
-            HMAC_Update(ctx, info, infolen);
+            if (!HMAC_Update(ctx, info, infolen))
+                break;
 #endif
         }
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
-        HMAC_Update(&ctx, &ctr, sizeof(unsigned char));
-        HMAC_Final(&ctx, digest, &digestlen);
+        if (!HMAC_Update(&ctx, &ctr, sizeof(unsigned char)) ||  HMAC_Final(&ctx, digest, &digestlen))
+            break;
 #else
-        HMAC_Update(ctx, &ctr, sizeof(unsigned char));
-        HMAC_Final(ctx, digest, &digestlen);
+        if (!HMAC_Update(ctx, &ctr, sizeof(unsigned char)) || HMAC_Final(ctx, digest, &digestlen))
+            break;
 #endif
         if ((len + digestlen) > okmlen) {
             memcpy(okm + len, digest, okmlen - len);
@@ -1137,7 +1139,7 @@ set_config_frame_wrapped_data(unsigned char *ptr, unsigned int non_wrapped_len, 
 
     if (NULL != dpp_ctx) {
 	    memset(json, 0, 1024);
-	    dpp_build_config(dpp_ctx, json);
+	    dpp_build_config(dpp_ctx, json, sizeof(json));
         tlv = set_tlv((unsigned char*)tlv, wifi_dpp_attrib_id_config_object, strlen(json), json);
         wrapped_len += (4 + strlen(json));
     }

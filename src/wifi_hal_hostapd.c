@@ -345,7 +345,7 @@ void init_oem_config(wifi_interface_info_t *interface)
     conf->model_url = (char *)&interface->model_url;
     conf->fw_version = malloc(strlen(interface->firmware_version) + 1);
     if (conf->fw_version != NULL) {
-        strcpy(conf->fw_version, interface->firmware_version);
+        snprintf(conf->fw_version, strlen(interface->firmware_version) + 1, "%s", interface->firmware_version);
     }
 
     if(wps_dev_type_str2bin("6-0050F204-1", conf->device_type)) {
@@ -882,7 +882,7 @@ int update_security_config(wifi_vap_security_t *sec, struct hostapd_bss_config *
             conf->radius_das_port = sec->u.radius.dasport;
             conf->radius_das_shared_secret = sec->u.radius.daskey;
             conf->radius_das_shared_secret_len = strlen( conf->radius_das_shared_secret);
-            getIpStringFromAdrress(test_ip, &sec->u.radius.dasip);
+            getIpStringFromAdrress(test_ip, &sec->u.radius.dasip, sizeof(test_ip));
 
             if (inet_pton(AF_INET, test_ip, &ipaddr)) {
                 conf->radius_das_client_addr.af = AF_INET;

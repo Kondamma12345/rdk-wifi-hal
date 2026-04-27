@@ -855,7 +855,7 @@ int platform_create_vap(wifi_radio_index_t r_index, wifi_vap_info_map_t *map)
       if (map->vap_array[index].vap_mode == wifi_vap_mode_ap)
       {
         memset(temp_buff, 0 ,sizeof(temp_buff));
-        if (get_security_mode_str_from_int(map->vap_array[index].u.bss_info.security.mode, map->vap_array[index].vap_index, temp_buff) == RETURN_OK)
+        if (get_security_mode_str_from_int(map->vap_array[index].u.bss_info.security.mode, map->vap_array[index].vap_index, temp_buff, sizeof(temp_buff)) == RETURN_OK)
         {
           if(uci_converter_set_str(TYPE_VAP, map->vap_array[index].vap_index, "encryption", temp_buff))
             wifi_hal_dbg_print("%s:%d: Failed to set the encryption type:%s for apIndex:%d\n", __func__, __LINE__,temp_buff,map->vap_array[index].vap_index);
@@ -908,7 +908,7 @@ int platform_create_vap(wifi_radio_index_t r_index, wifi_vap_info_map_t *map)
       else if (map->vap_array[index].vap_mode == wifi_vap_mode_sta)
       {
         memset(temp_buff, 0 ,sizeof(temp_buff));
-        if (get_security_mode_str_from_int(map->vap_array[index].u.bss_info.security.mode, map->vap_array[index].vap_index, temp_buff) == RETURN_OK)
+        if (get_security_mode_str_from_int(map->vap_array[index].u.bss_info.security.mode, map->vap_array[index].vap_index, temp_buff, sizeof(temp_buff)) == RETURN_OK)
         {
           if(uci_converter_set_str(TYPE_VAP, map->vap_array[index].vap_index, "encryption", temp_buff))
             wifi_hal_dbg_print("%s:%d: Failed to set the encryption type:%s for apIndex:%d\n", __func__, __LINE__,temp_buff,map->vap_array[index].vap_index);
