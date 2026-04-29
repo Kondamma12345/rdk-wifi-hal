@@ -56,6 +56,9 @@
 #endif
 #include <linux/filter.h>
 #include <fcntl.h>
+#if defined(CONFIG_WIFI_EMULATOR_EXT_AGENT)
+#include <linux/sched.h>
+#endif
 
 #if defined(TCXB7_PORT) || defined(TCXB8_PORT) || defined(XB10_PORT)
 #include <sys/mman.h>
@@ -4011,12 +4014,27 @@ error:
 int get_vap_state(const char *ifname, short *flags)
 {
     struct ifreq ifr;
-    int fd, res;
+    int fd, res = -1;
 
     strncpy(ifr.ifr_name, ifname, IFNAMSIZ);
     ifr.ifr_name[IFNAMSIZ - 1] = '\0';
     wifi_hal_dbg_print("%s:%d interface name = '%s'\n", __func__, __LINE__, ifr.ifr_name);
 
+#if defined(CONFIG_WIFI_EMULATOR_EXT_AGENT)
+    int current_ns_fd = -1;
+    int target_ns_fd = -1;
+    current_ns_fd = open("/proc/self/ns/net", O_RDONLY);
+
+    target_ns_fd = open("/var/run/netns/default", O_RDONLY);
+    if (current_ns_fd == -1 || target_ns_fd == -1) {
+        wifi_hal_error_print("%s:%d Failed to open namespace handles\n", __func__, __LINE__);
+        goto cleanup;
+    }
+    if (setns(target_ns_fd, CLONE_NEWNET) != 0) {
+        wifi_hal_error_print("%s:%d Failed to setns to default\n", __func__, __LINE__);
+        goto cleanup;
+    }
+#endif
     if ((fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
         wifi_hal_error_print("%s %d socket error %s\n", __func__, __LINE__, strerror(errno));
         return -1;
@@ -4028,7 +4046,16 @@ int get_vap_state(const char *ifname, short *flags)
         wifi_hal_error_print("%s:%d ioctl failed: (%d) %s\n", __func__, __LINE__, res, strerror(errno));
     }
     close(fd);
-
+#if defined(CONFIG_WIFI_EMULATOR_EXT_AGENT)
+cleanup:
+    if (current_ns_fd != -1) {
+        setns(current_ns_fd, CLONE_NEWNET);
+        close(current_ns_fd);
+    }
+    if (target_ns_fd != -1) {
+        close(target_ns_fd);
+    }
+#endif
     *flags = ifr.ifr_flags;
 
     return res;
@@ -6815,13 +6842,13 @@ static int get_sta_handler(struct nl_msg *msg, void *arg)
                         __LINE__, link_idx);
                         break;
                     }
-                    associated_dev.cli_MLDInfo.cli_LinkInfo[link_idx].cli_LinkID = link_id;
-                    associated_dev.cli_MLDInfo.cli_LinkInfo[link_idx].cli_RSSI = link_rssi;
-                    associated_dev.cli_MLDInfo.cli_LinkInfo[link_idx].cli_Valid = true;
-                    link_idx++;
-                    has_link_stats = true;
                 }
             }
+            associated_dev.cli_MLDInfo.cli_LinkInfo[link_idx].cli_LinkID = link_id;
+            associated_dev.cli_MLDInfo.cli_LinkInfo[link_idx].cli_RSSI = link_rssi;
+            associated_dev.cli_MLDInfo.cli_LinkInfo[link_idx].cli_Valid = true;
+            link_idx++;
+            has_link_stats = true;
         }
     }
 #endif // HOSTAPD_VERSION >= 211 && CONFIG_IEEE80211BE
@@ -6883,10 +6910,6 @@ static int get_sta_handler(struct nl_msg *msg, void *arg)
 
         for (int link_idx = 0; link_idx < MAX_NUM_RADIOS; link_idx++) {
             if (associated_dev.cli_MLDInfo.cli_LinkInfo[link_idx].cli_Valid) {
-                //Determine assoc link
-                if (associated_dev.cli_MLDInfo.cli_LinkInfo[link_idx].cli_LinkID == mld_assoc_link_id) {
-                    associated_dev.cli_MLDInfo.cli_LinkInfo[link_idx].cli_IsAssocLink = true;
-                }
                 //update vap index for the link
                 int link_id = associated_dev.cli_MLDInfo.cli_LinkInfo[link_idx].cli_LinkID;
                 wifi_interface_info_t *link_iface = wifi_hal_get_mld_interface_by_link_id(interface, link_id);
@@ -6897,6 +6920,18 @@ static int get_sta_handler(struct nl_msg *msg, void *arg)
                     continue;
                 }
                 associated_dev.cli_MLDInfo.cli_LinkInfo[link_idx].cli_VapIndex = link_iface->vap_info.vap_index;
+                /* Determine assoc link and reorder links to have assoc link at index 0 if it is not already.
+                 * assoc link must be at index 0 */
+                if (link_id == mld_assoc_link_id) {
+                    associated_dev.cli_MLDInfo.cli_LinkInfo[link_idx].cli_IsAssocLink = true;
+                    wifi_hal_dbg_print("%s:%d: Link %d is assoc link\n", __func__, __LINE__, link_id);
+                    if (link_idx != 0) {
+                        wifi_mld_sta_link_info_t temp = associated_dev.cli_MLDInfo.cli_LinkInfo[0];
+                        associated_dev.cli_MLDInfo.cli_LinkInfo[0] = associated_dev.cli_MLDInfo.cli_LinkInfo[link_idx];
+                        associated_dev.cli_MLDInfo.cli_LinkInfo[link_idx] = temp;
+                        wifi_hal_dbg_print("%s:%d: Reordered assoc link %d to index 0\n", __func__, __LINE__, link_id);
+                    }
+                }
             }
         }
     } else if (associated_dev.cli_MLDInfo.cli_MLDSta == true && has_link_stats == false) {
