@@ -298,6 +298,7 @@ static void set_wl_runtime_configs (const wifi_vap_info_map_t *vap_map)
 int get_emu_neighbor_stats(uint radio_index, wifi_neighbor_ap2_t **neighbor_ap_array,
     uint *data_count)
 {
+    wifi_hal_stats_dbg_print("%s:%d: Entry\n", __func__, __LINE__);
     int fd = -1;
     char file_path[64];
     sem_t *sem;
@@ -397,6 +398,7 @@ int get_emu_neighbor_stats(uint radio_index, wifi_neighbor_ap2_t **neighbor_ap_a
 
     close(fd);
     sem_close(sem);
+    wifi_hal_stats_dbg_print("%s:%d: Exit\n", __func__, __LINE__);
     return RETURN_OK;
 }
 #endif // WIFI_EMULATOR_CHANGE
@@ -1795,6 +1797,7 @@ static char *channel_width_to_string_convert(wifi_channelBandwidth_t channelWidt
 
 static int get_chanspec_string(wifi_radio_operationParam_t *operationParam, char *chspec, wifi_radio_index_t index, size_t len)
 {
+    wifi_hal_dbg_print("%s:%d: Entry\n", __func__, __LINE__);
     char *sideband = "";
     char *band = "";
     char *bw = NULL;
@@ -1820,6 +1823,7 @@ static int get_chanspec_string(wifi_radio_operationParam_t *operationParam, char
     else {
         snprintf(chspec, len, "%s%d/%s", band, operationParam->channel, bw);
     }
+    wifi_hal_dbg_print("%s:%d: Exit\n", __func__, __LINE__);
     return 0;
 }
 

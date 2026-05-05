@@ -330,6 +330,7 @@ void init_hostap_bss(wifi_interface_info_t *interface)
 
 void init_oem_config(wifi_interface_info_t *interface)
 {
+    wifi_hal_dbg_print("%s:%d: Entry\n", __func__, __LINE__);
 #ifdef CONFIG_WPS
     struct hostapd_bss_config *conf;
     wifi_device_info_t device_info;
@@ -368,6 +369,7 @@ void init_oem_config(wifi_interface_info_t *interface)
     conf->ap_vlan = interface->vlan;
 #endif
 #endif
+    wifi_hal_dbg_print("%s:%d: Exit\n", __func__, __LINE__);
 }
 
 void driver_init(wifi_interface_info_t *interface)

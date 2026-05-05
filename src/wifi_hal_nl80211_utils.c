@@ -2565,6 +2565,7 @@ int get_security_encryption_mode_str_from_int(wifi_encryption_method_t encryptio
 
 INT get_coutry_str_from_oper_params(wifi_radio_operationParam_t *operParams, char *country)
 {
+    wifi_hal_dbg_print("%s:%d: Entry\n", __func__, __LINE__);
     unsigned int index = 0;
     char tmp_countrycode_str[4];
     char tmp_environment_str[4];
@@ -2592,6 +2593,7 @@ INT get_coutry_str_from_oper_params(wifi_radio_operationParam_t *operParams, cha
 
     snprintf(country, 4, "%s%s", tmp_countrycode_str, tmp_environment_str);
 
+    wifi_hal_dbg_print("%s:%d: Exit\n", __func__, __LINE__);
     return RETURN_OK;
 }
 
@@ -3044,6 +3046,7 @@ wifi_interface_info_t *rnr_sta6(void)
 
 INT get_coutry_str_from_code(wifi_countrycode_type_t code, char *country)
 {
+    wifi_hal_dbg_print("%s:%d: Entry\n", __func__, __LINE__);
     unsigned int index = 0;
     bool value_updated = false;
 
@@ -3059,6 +3062,7 @@ INT get_coutry_str_from_code(wifi_countrycode_type_t code, char *country)
         //Copy default value
         snprintf(country, sizeof("US"), "%s", "US");
     }
+    wifi_hal_dbg_print("%s:%d: Exit\n", __func__, __LINE__);
     return RETURN_OK;
 }
 
@@ -5652,6 +5656,7 @@ void concat_band_to_vap_name(wifi_vap_name_t vap_name, unsigned int rdk_radio_in
 
 int configure_vap_name_basedon_colocated_mode(char *ifname, int colocated_mode)
 {
+    wifi_hal_error_print("%s:%d: Entry\n", __func__, __LINE__);
     unsigned int index = 0, i = 0;
     wifi_interface_info_t *interface = NULL;
     int vap_count = 0;
@@ -5708,6 +5713,7 @@ int configure_vap_name_basedon_colocated_mode(char *ifname, int colocated_mode)
     }
     wifi_hal_error_print("%s:%d: Interface:%s not present in interface_index_map\n", __func__,
         __LINE__, ifname);
+    wifi_hal_error_print("%s:%d: Exit\n", __func__, __LINE__); 
     return -1;
 }
 

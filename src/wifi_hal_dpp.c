@@ -666,6 +666,7 @@ int dpp_build_connector(wifi_device_dpp_context_t *dpp_ctx, char* connector, boo
 
 void dpp_build_config(wifi_device_dpp_context_t *ctx, char* str, size_t len)
 {
+        wifi_dpp_dbg_print("%s:%d: Entry\n", __func__, __LINE__);
  	char *out;
 	char reconfig_connector[1024];
 	wifi_dpp_configuration_object_t *obj = &ctx->config;
@@ -749,6 +750,7 @@ void dpp_build_config(wifi_device_dpp_context_t *ctx, char* str, size_t len)
             free(out);
         }
 	
+        wifi_dpp_dbg_print("%s:%d: Exit\n", __func__, __LINE__);
 	return;
 }
 
@@ -846,6 +848,7 @@ hkdf (const EVP_MD *h, int skip,
     unsigned char *prk, *tweak, ctr, *digest;
     int len;
     unsigned int digestlen, prklen, tweaklen;
+    printf("%s:%d: Entry\n", __func__, __LINE__);
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
     HMAC_CTX ctx;
 #else
@@ -966,6 +969,7 @@ hkdf (const EVP_MD *h, int skip,
     HMAC_CTX_free(ctx);
 #endif
 
+    printf("%s:%d: Exit\n", __func__, __LINE__);
     return okmlen;
 }
 
@@ -3380,17 +3384,19 @@ static void *wifi_dppTestFrameHandler(void *arg)
 	struct sockaddr_in saddr;
 	socklen_t slen;
 
-    wifi_dpp_dbg_print("%s:%d: Enter\n", __func__, __LINE__);
+    wifi_dpp_dbg_print("%s:%d: Entry\n", __func__, __LINE__);
 
     prctl(PR_SET_NAME,  __func__, 0, 0, 0);
 
     if ((access("/nvram/wifiDppTest", R_OK)) != 0) {
         wifi_dpp_dbg_print("%s:%d: Not a debug build exiting\n", __func__, __LINE__);
+        wifi_dpp_dbg_print("%s:%d: Exit 1\n", __func__, __LINE__);
         return NULL;
     }
 
 	if ((sockfd = create_test_socket()) < 0) {
         wifi_dpp_dbg_print("%s:%d: Socket create failed\n", __func__, __LINE__);
+        wifi_dpp_dbg_print("%s:%d: Exit 2\n", __func__, __LINE__);
         return NULL;
 
 	}
@@ -3473,6 +3479,7 @@ static void *wifi_dppTestFrameHandler(void *arg)
 
     close(sockfd);
 
+    wifi_dpp_dbg_print("%s:%d: Exit End\n", __func__, __LINE__);
 	return NULL;
 }
 
