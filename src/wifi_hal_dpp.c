@@ -1061,6 +1061,7 @@ get_config_frame_wrapped_data(unsigned char *ptr, unsigned int attrib_len, wifi_
 int
 get_auth_frame_wrapped_data(wifi_dppPublicActionFrameBody_t *frame, unsigned int attrib_len, wifi_dpp_instance_t *instance, unsigned char *plain, unsigned int len, bool reconfig)
 {
+    printf("%s:%d: KondamamEntry\n", __func__, __LINE__);
     siv_ctx ctx;
     wifi_tlv_t *tlv;
     unsigned int non_wrapped_len;;
@@ -1095,14 +1096,23 @@ get_auth_frame_wrapped_data(wifi_dppPublicActionFrameBody_t *frame, unsigned int
     printf("%s:%d: Non wrapped length:%d, must match with %d attrib_len:%d\n", __func__, __LINE__, 
         non_wrapped_len, attrib_len - tlv->length, attrib_len);
 
+    if (tlv->length < AES_BLOCK_SIZE || tlv->length > (len + AES_BLOCK_SIZE)) {
+        wifi_dpp_dbg_print("%s:%d invalid wrapped_data length=%u\n", __func__, __LINE__, tlv->length);
+        return -1;
+    }
     decrypted_len = siv_decrypt(&ctx, &tlv->value[AES_BLOCK_SIZE], plain, tlv->length - AES_BLOCK_SIZE, tlv->value, 2,
                         frame, sizeof(wifi_dppPublicActionFrameBody_t),
                         frame->attrib, non_wrapped_len);
-        
+
+    if (decrypted_len < 0 || (unsigned int)decrypted_len > len) {
+        wifi_dpp_dbg_print("%s:%d invalid decrypt length=%d\n", __func__, __LINE__, decrypted_len);
+        return -1;
+    }
     printf("%s:%d: Decrypted length:%d\n", __func__, __LINE__, decrypted_len);
+    printf("%s:%d: KondamamExit\n", __func__, __LINE__);
 
 
-    return (decrypted_len == -1) ? -1:tlv->length - AES_BLOCK_SIZE;
+    return decrypted_len;
 }
 
 int

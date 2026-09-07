@@ -79,6 +79,7 @@ int ipc_server_output(struct hal_ipc_processor_desc *desc,
                       void *arg4,
                       void *arg5)
 {
+    wifi_hal_dbg_print("%s:%d KondammaEntry\n", __func__, __LINE__);
     int index = 0;
     unsigned long num_entries;
     unsigned long long handle;
@@ -281,13 +282,14 @@ int ipc_server_output(struct hal_ipc_processor_desc *desc,
             output_array_size = 0;
             wifi_neighbor_ap2_t *tmp_neighbr_ap;
 
-            wifi_neighbor_ap2_t *neighbor_ap_array;
+            wifi_neighbor_ap2_t *neighbor_ap_array = NULL;
 
             desc->ret = wifi_hal_getNeighboringWiFiStatus(index, &neighbor_ap_array, &output_array_size);
             if (desc->ret) {
                 wifi_hal_error_print("%s:%d FAIL call to %s returned %d code\n", __func__, __LINE__, desc->name, desc->ret);
                 cleanup_desc_scratch_buf(desc);
-                free(neighbor_ap_array);
+                if (neighbor_ap_array)
+                    free(neighbor_ap_array);
                 goto error_happened;
             }
 
@@ -1137,6 +1139,7 @@ int ipc_server_output(struct hal_ipc_processor_desc *desc,
             break;
     }
 
+    wifi_hal_dbg_print("%s:%d KondammaExit\n", __func__, __LINE__);
     return 0;
 
 error_happened:
