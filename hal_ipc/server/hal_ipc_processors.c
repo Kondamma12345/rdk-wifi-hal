@@ -43,6 +43,7 @@ static void cleanup_desc_scratch_buf(struct hal_ipc_processor_desc *desc)
 
 int sync_hostapd_freq_param(unsigned int apIndex)
 {
+    wifi_hal_error_print("%s:%d KondammaEntry\n", __func__, __LINE__);
     wifi_interface_info_t *interface;
     wifi_vap_info_t *vap;
     wifi_radio_info_t *radio;
@@ -72,6 +73,7 @@ int sync_hostapd_freq_param(unsigned int apIndex)
     } else {
         wifi_hal_dbg_print("%s:%d: ap index:%u existing freq:%d curr freq:%d\n", __func__, __LINE__, apIndex, interface->u.ap.hapd.iface->freq, freq);
     }
+    wifi_hal_error_print("%s:%d KondammaExit\n", __func__, __LINE__);
     return RETURN_OK;
 }
 

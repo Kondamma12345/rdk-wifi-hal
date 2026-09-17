@@ -862,6 +862,7 @@ int nvram_get_current_security_mode(wifi_security_modes_t *security_mode,int vap
 
 int platform_get_keypassphrase_default(char *password, int vap_index)
 {
+    wifi_hal_error_print("%s:%d KondammaEntry\n", __func__, __LINE__);
     int ret = 0;
     char param [DEFAULT_CMD_SIZE] = {0};
     char value[MAX_DEFAULT_VALUE_SIZE] = {0};
@@ -891,6 +892,7 @@ int platform_get_keypassphrase_default(char *password, int vap_index)
         return 0;
     }
     snprintf(password, WIFI_AP_MAX_PASSPHRASE_LEN, "%s", value);
+    wifi_hal_error_print("%s:%d KondammaExit\n", __func__, __LINE__);
 
     return 0;
 }
