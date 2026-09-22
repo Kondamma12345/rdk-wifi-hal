@@ -942,6 +942,7 @@ int rdk_hal_ipc_exec(hal_ipc_node_t *p_ipc_node, hal_ipc_processor_desc_t *desc)
 //--------------------------------------------------------------------------------------------------
 static void *rdk_hal_server_func(void *arg)
 {
+    wifi_hal_dbg_print("%s:%d: sent %d bytes\n", __func__, __LINE__, desc->len);
     int cli_sock;
     ssize_t nbytes, target_bytes, max_size = MAX_IPC_BUFF;
     socklen_t len;
