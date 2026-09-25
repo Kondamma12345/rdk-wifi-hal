@@ -1233,6 +1233,7 @@ INT wifi_hal_disconnect(INT ap_index)
 
 INT wifi_hal_findNetworks(INT ap_index, wifi_channel_t *channel, wifi_bss_info_t **bss_array, UINT *num_bss)
 {
+    wifi_hal_error_print("%s:%d:KondammaEntry\n", __func__, __LINE__);
     wifi_interface_info_t *interface;
     wifi_vap_info_t *vap;
     wifi_bss_info_t *bss;
@@ -1307,6 +1308,7 @@ INT wifi_hal_findNetworks(INT ap_index, wifi_channel_t *channel, wifi_bss_info_t
     *num_bss = write_index;
     pthread_mutex_unlock(&interface->scan_info_mutex);
 
+    wifi_hal_error_print("%s:%d:KondammaExit\n", __func__, __LINE__);
     return RETURN_OK;
 }
 
